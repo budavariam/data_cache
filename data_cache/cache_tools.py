@@ -190,6 +190,9 @@ def cache_decorator_factory(table_getter: Type[store_function]) -> Type[cache_ab
             args = list(args) + [orig_func]
             orig_func = None
 
+        # if os.environ.get("DISABLE_CACHE", "FALSE") == "TRUE":
+        #     return func(*f_args, **f_kwargs)
+
         def decorated(func: cache_able_function) -> Type[cache_able_function]:
             @functools.wraps(func)
             def wrapped(*f_args: Tuple[Any], **f_kwargs: Dict[str, Any]) -> cached_data_type:
@@ -209,6 +212,7 @@ def cache_decorator_factory(table_getter: Type[store_function]) -> Type[cache_ab
                 extracted_args = {k: str(v) for k, v in extracted_args.items()}
                 group = "a" + hashlib.md5(inspect.getsource(func).encode("utf-8")).hexdigest()
                 key = "a" + hashlib.md5(json.dumps(extracted_args).encode("utf-8")).hexdigest()
+                print("accessing: ", group, key)
                 return table_getter(group, key, func, f_args, f_kwargs, extracted_args)
 
             return wrapped
